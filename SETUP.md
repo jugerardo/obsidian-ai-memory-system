@@ -157,19 +157,75 @@ WHERE contains(projects, "[[ProjectName]]")
 
 If you decide not to use Dataview, the MOCs still work — but they become hand-maintained link lists instead of auto-populating queries. You'll need to add a link manually each time you create an insight. Workable for a small vault, painful at scale.
 
-## 4. Other recommended Obsidian settings
+## 4. Install the Obsidian Local REST API plugin and obsidian-mcp
+
+The wrap-up and insight-extraction skills read and write vault files through the **obsidian-mcp**, which is backed by the **Obsidian Local REST API** community plugin. Without this, the skills cannot access your vault — they will stop and tell you the mcp is not connected rather than fall back to the file system.
+
+### 4a. Install the Obsidian Local REST API plugin
+
+1. In Obsidian: **Settings → Community plugins → Browse**.
+2. Search **Local REST API**.
+3. Click the result → **Install** → **Enable**.
+4. Go to **Settings → Local REST API**.
+5. Note the **API key** shown — you'll need it in the next step.
+6. Keep the default port (`27123`) unless it conflicts with something else on your machine.
+7. Leave the plugin enabled whenever you plan to use Claude with your vault.
+
+The plugin exposes a local HTTP server that lets external tools (like obsidian-mcp) read and write your notes securely without needing access to the raw file system.
+
+### 4b. Install and configure obsidian-mcp
+
+obsidian-mcp is the MCP server that wraps the Local REST API so Claude Code can call it as a tool.
+
+```bash
+# Install via npm (requires Node.js 18+)
+npm install -g obsidian-mcp
+```
+
+Then add it to your Claude Code MCP config (`~/.claude/mcp.json` or your project-level `.mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "obsidian": {
+      "command": "obsidian-mcp",
+      "args": [],
+      "env": {
+        "OBSIDIAN_API_KEY": "<your-api-key-from-step-4a>",
+        "OBSIDIAN_BASE_URL": "http://localhost:27123"
+      }
+    }
+  }
+}
+```
+
+Replace `<your-api-key-from-step-4a>` with the key from the plugin settings.
+
+### 4c. Verify the connection
+
+Start a Claude Code session inside your vault and run:
+
+> "Use the obsidian-mcp to read `_meta/Vault-Conventions.md` and tell me the first line."
+
+If Claude returns the content, the mcp is wired up correctly. If it errors, check that:
+
+- Obsidian is open and the Local REST API plugin is enabled.
+- The API key in your mcp config matches the one in plugin settings.
+- The port in `OBSIDIAN_BASE_URL` matches the plugin's configured port.
+
+## 5. Other recommended Obsidian settings
 
 - **Settings → Files & Links → New link format**: `Relative path to file` (keeps links portable when folders move).
 - **Settings → Files & Links → Default location for new notes**: `In the current folder`.
 - **Settings → Editor → Strict line breaks**: off.
 
-## 5. Fill in `_meta/Me.md`
+## 6. Fill in `_meta/Me.md`
 
 Open `_meta/Me.md` and replace the placeholder sections with your own info. This file is referenced by every project's CLAUDE.md, so it's the foundation of how Claude works with you.
 
 Fast path: ask Claude to "interview me for my Me.md" and it'll ask 5–8 questions and generate the file.
 
-## 6. Set up the skills
+## 7. Set up the skills
 
 The two skills (`wrap-up` and `insight-extraction`) live as templates in `_templates/`. To make them available as proper Claude Code skills:
 
@@ -195,7 +251,7 @@ Same idea — drop them into your Cowork skills directory, or paste the content 
 
 The skill files are written as plain markdown procedures. Paste the relevant skill into your AI's system prompt or context when you want to invoke it.
 
-## 7. Start your first project
+## 8. Start your first project
 
 ```bash
 mkdir -p 20_Projects/MyFirstProject/{sessions,decisions,artifacts}
@@ -205,7 +261,7 @@ cp _templates/project-index.md 20_Projects/MyFirstProject/_index.md
 
 Open `CLAUDE.md` and `_index.md`, fill in goals and current focus, and you're ready to work.
 
-## 8. Test the wrap-up skill
+## 9. Test the wrap-up skill
 
 Have a working session with Claude inside the project folder, then say **"wrap up this session"**. It should:
 
@@ -214,7 +270,7 @@ Have a working session with Claude inside the project folder, then say **"wrap u
 3. Append a link in `_index.md` under "Recent sessions".
 4. Reply with the saved file path.
 
-## 9. Schedule insight extraction
+## 10. Schedule insight extraction
 
 Decide on a cadence (weekly is a good default). At your chosen time:
 
@@ -224,6 +280,10 @@ Decide on a cadence (weekly is a good default). At your chosen time:
 
 ## Troubleshooting
 
+- **obsidian-mcp not connected / skill stops immediately**: make sure Obsidian is open and the Local REST API plugin is enabled. The plugin only serves requests while Obsidian is running.
+- **API key mismatch error**: open **Settings → Local REST API** in Obsidian and copy the key again — it regenerates if you reinstall the plugin.
+- **Port conflict**: if `27123` is taken, change it in the plugin settings and update `OBSIDIAN_BASE_URL` in your mcp config to match.
+- **`obsidian-mcp` command not found**: make sure you ran `npm install -g obsidian-mcp` and that your global npm bin directory is on your `PATH` (`npm bin -g` shows the path).
 - **Frontmatter doesn't render in Obsidian**: enable **Settings → Editor → Properties in document → Visible**.
 - **Dataview query shows nothing**: check that your insight files have a top-level `scenarios:` field (not nested under another key) and the values match what's in `_meta/Scenarios.md`.
 - **Wrap-up keeps saving to the wrong folder**: clarify the routing rules in your project's `CLAUDE.md` or in `_meta/Vault-Conventions.md`.
