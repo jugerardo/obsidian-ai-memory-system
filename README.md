@@ -6,7 +6,7 @@ Built around a simple idea: **conversations are logs, but insights are atoms**. 
 
 ## The problem this solves
 
-If you've used ChatGPT projects, you've probably hit this wall: every project becomes its own silo. When performance review time comes around and you want to draft a self-review using insights from across a year of work — the context doesn't exist. Every conversation lives in its own bubble.
+Most AI tools keep your work in isolated threads or projects — there's no memory that carries across sessions, tools, or time. When performance review time comes around and you want to draft a self-review using insights from across a year of work, that context simply doesn't exist. Every conversation lives in its own bubble.
 
 This system fixes that by:
 
