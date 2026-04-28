@@ -1,0 +1,20 @@
+# Obsidian workspace files (per-user, not shareable)
+.obsidian/workspace*
+.obsidian/cache
+.obsidian/appearance.json
+.obsidian/graph.json
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor swap
+*.swp
+*.swo
+*~
+
+# Local-only personal notes — uncomment if you keep your private vault in the same repo
+# 00_Inbox/**
+# !00_Inbox/.gitkeep
+# !00_Inbox/README.md
