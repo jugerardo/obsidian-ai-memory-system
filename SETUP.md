@@ -21,15 +21,141 @@ If you want your private vault to also be on GitHub (in a private repo), create 
 2. In Obsidian: **Open folder as vault** → select your `my-vault` directory.
 3. Trust the vault when prompted (allows community plugins to load).
 
-## 3. Install Dataview (recommended)
+## 3. Install and configure Dataview
 
-Dataview lets your scenario MOCs auto-populate from frontmatter — when you tag an insight with `scenarios: [self-review]`, it automatically appears in the Self-Review MOC without manual linking.
+Dataview is the plugin that makes scenario MOCs auto-populate. When you tag an insight with `scenarios: [self-review]`, it automatically shows up in the Self-Review MOC — no manual linking. Without it, every MOC update would be hand-maintained.
 
-1. Settings → **Community plugins** → Turn on community plugins.
-2. **Browse** → search **Dataview** → Install → Enable.
-3. Settings → **Dataview** → enable **Inline Queries** (optional but useful).
+### What Dataview does
 
-If you skip Dataview, MOCs still work — they're just hand-maintained link lists instead of auto-populating queries.
+It treats your vault like a database. Frontmatter fields become queryable columns. The MOC files in `60_MOCs/Scenarios/` already contain example queries — Dataview reads them and renders the results inline.
+
+### Install it
+
+1. Open Obsidian.
+2. **Settings** (gear icon, bottom-left) → **Community plugins**.
+3. If you see "Restricted mode is on", click **Turn on community plugins** and confirm.
+4. Click **Browse**.
+5. Search **Dataview**.
+6. Click the result → **Install** → **Enable**.
+
+### Configure it
+
+1. **Settings** → **Dataview** (now appears in the left sidebar under "Community plugins").
+2. Recommended settings:
+   - **Enable JavaScript Queries**: off (you don't need it; codeblock queries are enough).
+   - **Enable Inline Queries**: on (lets you embed `= this.file.name` style queries in any note).
+   - **Enable Inline Field Highlighting**: on.
+   - **Render Null As**: leave blank or set to `—`.
+3. Close settings.
+
+### Verify it's working
+
+Open `60_MOCs/Scenarios/Self-Review.md`. You should see a code block like this:
+
+````markdown
+```dataview
+TABLE
+  summary AS "Insight",
+  projects AS "Projects",
+  date AS "Date"
+FROM "40_Insights"
+WHERE contains(scenarios, "self-review")
+SORT date DESC
+```
+````
+
+In **Reading view** (Ctrl/Cmd+E to toggle), this should render as an empty table (you don't have any insights yet — that's expected). If you see the raw `dataview` codeblock instead of a rendered table, Dataview isn't enabled. Re-check the plugin settings.
+
+### Test it with a fake insight
+
+To verify queries actually work:
+
+1. Create a file at `40_Insights/test-insight.md`:
+
+   ```markdown
+   ---
+   type: insight
+   date: 2026-04-28
+   status: linked
+   scenarios: [self-review, code-tips]
+   summary: "Test insight to verify Dataview is working"
+   ---
+
+   # Test Insight
+
+   Just a placeholder.
+   ```
+
+2. Open `60_MOCs/Scenarios/Self-Review.md` in reading view. The table should now show one row with your test insight.
+3. Open `60_MOCs/Scenarios/Code-Tips.md`. Same insight should appear there too — that's the cross-cutting query in action.
+4. Delete the test file when satisfied.
+
+### Quick reference: Dataview query syntax
+
+The MOCs use these patterns. You can copy them when building your own queries.
+
+**List all insights for one scenario:**
+
+````markdown
+```dataview
+LIST summary
+FROM "40_Insights"
+WHERE contains(scenarios, "self-review")
+SORT date DESC
+```
+````
+
+**Table with multiple columns:**
+
+````markdown
+```dataview
+TABLE summary AS "Insight", projects AS "Projects", date AS "Date"
+FROM "40_Insights"
+WHERE contains(scenarios, "code-tips")
+SORT date DESC
+```
+````
+
+**Filter by tag AND scenario (e.g., React tips only):**
+
+````markdown
+```dataview
+LIST summary
+FROM "40_Insights"
+WHERE contains(scenarios, "code-tips") AND contains(tags, "react")
+```
+````
+
+**Insights about a specific person:**
+
+````markdown
+```dataview
+LIST summary
+FROM "40_Insights"
+WHERE contains(people, "[[Sarah]]")
+SORT date DESC
+```
+````
+
+**All insights from a project:**
+
+````markdown
+```dataview
+LIST summary
+FROM "40_Insights"
+WHERE contains(projects, "[[ProjectName]]")
+```
+````
+
+### Common gotchas
+
+- **Empty results**: check that the frontmatter field is at the top level (not nested) and that values match exactly. `scenarios: self-review` won't match a query for `["self-review"]` — use list form: `scenarios: [self-review]`.
+- **Query renders as plain code**: you're in editing/source view. Switch to reading view (Ctrl/Cmd+E) or live preview.
+- **Slow queries on a big vault**: scope `FROM` to a specific folder (`FROM "40_Insights"`) instead of querying everything.
+
+### Skipping Dataview
+
+If you decide not to use Dataview, the MOCs still work — but they become hand-maintained link lists instead of auto-populating queries. You'll need to add a link manually each time you create an insight. Workable for a small vault, painful at scale.
 
 ## 4. Other recommended Obsidian settings
 
