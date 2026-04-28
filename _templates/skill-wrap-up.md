@@ -7,6 +7,22 @@ description: Save the current session as a structured note in the Obsidian vault
 
 When the user says **"wrap up"**, **"wrap up this session"**, **"save this session"**, or any close variant, run this procedure to capture the session as a structured note in their vault.
 
+## Vault access
+
+All reads and writes to the Obsidian vault must go through the **obsidian-mcp**. Do not use file system tools (Read, Write, Edit, Bash) to touch vault files.
+
+Key operations and their obsidian-mcp equivalents:
+
+| What you need to do | obsidian-mcp tool to use |
+|---|---|
+| Read an existing note | `read_note` (or equivalent get/fetch tool) |
+| Create a new note | `create_note` (or equivalent write tool) |
+| Update an existing note (frontmatter or body) | `update_note` / `patch_note` (or equivalent) |
+| List notes in a folder | `list_notes` / `list_files` |
+| Search across notes | `search_notes` / `search` |
+
+If the obsidian-mcp is not connected or returns an error, **stop and tell the user** — do not fall back to file system tools silently.
+
 ## Inputs
 
 - The full conversation context (what we worked on this session).
@@ -77,15 +93,15 @@ Faithfully summarize the session. Specifically:
 
 ## Step 4: Save the file
 
-Write the file to the path from Step 1. Use ISO date prefix and the slug, e.g., `2026-04-28_obsidian-vault-design.md`.
+Use the obsidian-mcp `create_note` tool to write the file to the path from Step 1. Use ISO date prefix and the slug, e.g., `2026-04-28_obsidian-vault-design.md`.
 
 ## Step 5: Update affected indexes
 
 If routed to a project folder:
 
-- Open the project's `_index.md`.
-- Append a link to the new session under `## Recent sessions`, format: `- [[YYYY-MM-DD_slug|YYYY-MM-DD: short title]]`.
-- If the session changed the project's direction, revise the `## Current focus` section.
+- Use obsidian-mcp `read_note` to open the project's `_index.md`.
+- Use obsidian-mcp `update_note` to append a link to the new session under `## Recent sessions`, format: `- [[YYYY-MM-DD_slug|YYYY-MM-DD: short title]]`.
+- If the session changed the project's direction, revise the `## Current focus` section in the same update call.
 - If a significant decision was made and saved separately in `decisions/`, also append it under `## Decisions`.
 
 ## Step 6: Reply

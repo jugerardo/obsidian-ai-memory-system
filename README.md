@@ -72,6 +72,8 @@ This repo is a **template** — folder structure, note templates, skills, conven
 
 ### The two skills
 
+Both skills communicate with your vault through the **obsidian-mcp** (backed by the Obsidian Local REST API plugin). All file reads, creates, and updates go through the MCP — Claude never touches vault files directly via the file system. This means the mcp must be running whenever you invoke a skill.
+
 - **Wrap-up skill** — at the end of any session, you say "wrap up" and Claude generates a structured session summary, saves it to the right folder (project sessions / code sessions / standalone conversations), and updates the project's `_index.md` if applicable.
 - **Insight-extraction skill** — runs over notes flagged `status: raw`, identifies atomic insights worth keeping, creates them in `40_Insights/` with scenario tags, and links them back to the source. Run this on a schedule (weekly is a good cadence).
 
@@ -109,6 +111,7 @@ See [SETUP.md](./SETUP.md) for full instructions, including:
 
 - Cloning the template into your private vault
 - Installing Obsidian + Dataview plugin
+- Installing the Obsidian Local REST API plugin and obsidian-mcp (required for the skills)
 - Setting up the wrap-up and insight-extraction skills
 - Running the Me.md interview to seed your profile
 

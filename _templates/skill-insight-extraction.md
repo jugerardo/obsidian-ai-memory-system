@@ -9,6 +9,22 @@ When the user says **"extract insights"**, **"extract insights from new notes"**
 
 This skill is intentionally **deliberate, not automatic**. It produces drafts; the user accepts/edits/rejects each one. Quality is the goal — bloated insight folders are the failure mode.
 
+## Vault access
+
+All reads and writes to the Obsidian vault must go through the **obsidian-mcp**. Do not use file system tools (Read, Write, Edit, Bash) to touch vault files.
+
+Key operations and their obsidian-mcp equivalents:
+
+| What you need to do | obsidian-mcp tool to use |
+|---|---|
+| Read an existing note | `read_note` (or equivalent get/fetch tool) |
+| Create a new note | `create_note` (or equivalent write tool) |
+| Update an existing note (frontmatter or body) | `update_note` / `patch_note` (or equivalent) |
+| List notes in a folder | `list_notes` / `list_files` |
+| Search across notes | `search_notes` / `search` |
+
+If the obsidian-mcp is not connected or returns an error, **stop and tell the user** — do not fall back to file system tools silently.
+
 ## Inputs
 
 - The vault root.
@@ -18,7 +34,7 @@ This skill is intentionally **deliberate, not automatic**. It produces drafts; t
 
 ## Step 1: Find candidate notes
 
-Read all notes matching the scope filter where the frontmatter has `status: raw`. Sort by date.
+Use the obsidian-mcp `search_notes` or `list_notes` tool to find all notes matching the scope filter where the frontmatter has `status: raw`. Sort by date.
 
 If the user gave a narrower scope ("extract from this project's sessions" or "extract from this week's notes"), respect it.
 
@@ -26,7 +42,7 @@ If no notes are found with `status: raw`, tell the user "Nothing new to extract"
 
 ## Step 2: Read the Scenarios registry
 
-Open `_meta/Scenarios.md` and load the **active scenarios list** (their names, purposes, and inclusion criteria). You may **only** use scenario names from this list when tagging insights.
+Use obsidian-mcp `read_note` to open `_meta/Scenarios.md` and load the **active scenarios list** (their names, purposes, and inclusion criteria). You may **only** use scenario names from this list when tagging insights.
 
 If you find a candidate insight that genuinely doesn't fit any active scenario, follow the "propose new scenario" procedure in Step 6.
 
@@ -36,7 +52,7 @@ For each note in scope:
 
 ### 3a. Read the note's `## Candidate insights` section
 
-This is the load-bearing input. The wrap-up skill flagged these inline. They're starting points, not final insights.
+Use obsidian-mcp `read_note` to open the note. The `## Candidate insights` section is the load-bearing input. The wrap-up skill flagged these inline. They're starting points, not final insights.
 
 If the note has no `## Candidate insights` section but you spot atomic insights in the body, you may propose them — but be conservative.
 
@@ -55,7 +71,7 @@ If the candidate fails any of these, skip it.
 
 ### 3c. Check for duplicates
 
-Before creating a new insight, search `40_Insights/` for existing notes with similar titles or summaries. If a near-duplicate exists, prefer to **augment the existing insight** (add a related source, expand the body) over creating a new file.
+Before creating a new insight, use obsidian-mcp `search_notes` to search `40_Insights/` for existing notes with similar titles or summaries. If a near-duplicate exists, prefer to **augment the existing insight** (add a related source, expand the body) over creating a new file.
 
 Use a simple heuristic: if the existing insight's `summary:` and the candidate's stated lesson would overlap by ≥70%, treat as duplicate.
 
@@ -115,21 +131,21 @@ Wait for the user's decision per insight. Apply edits as instructed before savin
 
 For each accepted insight:
 
-1. Write the insight file to `40_Insights/<slug>.md`.
-2. Update the **source note's frontmatter**:
+1. Use obsidian-mcp `create_note` to write the insight file to `40_Insights/<slug>.md`.
+2. Use obsidian-mcp `update_note` to update the **source note's frontmatter**:
    - Flip `status: raw` → `status: processed`.
    - Add `related:` link to the new insight: `related: ["[[40_Insights/<slug>]]"]`.
-3. If the source note has `## Candidate insights`, leave the bullets in place but mark each that became an insight: `- [x] <description> → [[<slug>]]`.
+3. If the source note has `## Candidate insights`, use obsidian-mcp `update_note` to mark each bullet that became an insight: `- [x] <description> → [[<slug>]]`.
 
 For accepted updates to existing insights:
 
-1. Append to the existing insight's body or `Related` list.
-2. Add the new source to the existing insight's `source:` field (now a list).
+1. Use obsidian-mcp `update_note` to append to the existing insight's body or `Related` list.
+2. Add the new source to the existing insight's `source:` field (now a list) in the same update.
 3. Update the source note as above.
 
 For rejected candidates:
 
-- Don't create the file. In the source note, mark the bullet: `- [~] <description> (rejected: <reason>)`.
+- Don't create the file. Use obsidian-mcp `update_note` to mark the bullet in the source note: `- [~] <description> (rejected: <reason>)`.
 
 ## Step 6: Propose new scenarios (if needed)
 
@@ -137,14 +153,14 @@ If during processing you encounter a candidate insight that genuinely doesn't fi
 
 1. Propose a new scenario with: `name` (kebab-case), `purpose` (when the user would query for it), `inclusion criteria`.
 2. Ask the user to approve.
-3. If approved, append the new scenario to `_meta/Scenarios.md` under `## Active scenarios`.
+3. If approved, use obsidian-mcp `update_note` to append the new scenario to `_meta/Scenarios.md` under `## Active scenarios`.
 4. Use it for the candidate insight.
 
 Be stingy with new scenarios. Adding a new one should require ≥2 candidate insights that need it. If only one insight needs a new scenario, consider whether it really needs its own bucket, or if an existing one stretches to fit.
 
 ## Step 7: Mark fully-processed notes as linked
 
-Source notes where **all** candidate insights have been processed (accepted, rejected, or merged) get their `status:` flipped to `linked`. Notes with un-processed candidates stay at `processed`.
+Use obsidian-mcp `update_note` to flip source notes where **all** candidate insights have been processed (accepted, rejected, or merged) to `status: linked`. Notes with un-processed candidates stay at `processed`.
 
 ## Step 8: Reply
 
