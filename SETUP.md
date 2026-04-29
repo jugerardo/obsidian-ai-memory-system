@@ -233,12 +233,14 @@ The two skills (`wrap-up` and `insight-extraction`) live as templates in `_templ
 
 ```bash
 # Create the skills directory in your home or project
-mkdir -p ~/.claude/skills/wrap-up
-mkdir -p ~/.claude/skills/insight-extraction
+mkdir -p ~/.claude/skills/mem-wrap-up
+mkdir -p ~/.claude/skills/mem-insight-extraction
+mkdir -p ~/.claude/skills/mem-import
 
 # Copy the skill files, renaming to SKILL.md
-cp _templates/skill-wrap-up.md ~/.claude/skills/wrap-up/SKILL.md
-cp _templates/skill-insight-extraction.md ~/.claude/skills/insight-extraction/SKILL.md
+cp _templates/mem-wrap-up.md ~/.claude/skills/mem-wrap-up/SKILL.md
+cp _templates/mem-insight-extraction.md ~/.claude/skills/mem-insight-extraction/SKILL.md
+cp _templates/mem-import.md ~/.claude/skills/mem-import/SKILL.md
 ```
 
 The skills will then be auto-discovered by Claude Code when you trigger them with phrases like "wrap up this session" or "extract insights".

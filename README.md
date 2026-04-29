@@ -34,8 +34,9 @@ This repo is a **template** — folder structure, note templates, skills, conven
 │   ├── code-session.md
 │   ├── insight.md
 │   ├── project-index.md
-│   ├── skill-wrap-up.md       ← The "wrap up this session" skill
-│   ├── skill-insight-extraction.md  ← The "extract insights" skill
+│   ├── mem-wrap-up.md         ← The "wrap up this session" skill
+│   ├── mem-insight-extraction.md  ← The "extract insights" skill
+│   ├── mem-import.md          ← The "import from inbox" skill
 │   └── external-ai-wrap-up-prompts.md  ← Prompts for ChatGPT/Gemini to generate vault-ready summaries
 ├── 00_Inbox/                  ← Untriaged captures
 ├── 10_Conversations/          ← Standalone AI chats
