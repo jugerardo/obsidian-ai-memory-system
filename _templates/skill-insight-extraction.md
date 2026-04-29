@@ -40,11 +40,24 @@ If the user gave a narrower scope ("extract from this project's sessions" or "ex
 
 If no notes are found with `status: raw`, tell the user "Nothing new to extract" and stop.
 
-## Step 2: Read the Scenarios registry
+## Step 2: Read the Scenarios registry and build the deduplication index
+
+### 2a. Load the Scenarios registry
 
 Use obsidian-mcp `read_note` to open `_meta/Scenarios.md` and load the **active scenarios list** (their names, purposes, and inclusion criteria). You may **only** use scenario names from this list when tagging insights.
 
-If you find a candidate insight that genuinely doesn't fit any active scenario, follow the "propose new scenario" procedure in Step 6.
+### 2b. Build a deduplication index
+
+Use obsidian-mcp `list_notes` to get all files in `40_Insights/`, then use `read_note` to read the frontmatter of each one (you only need `summary:`, `scenarios:`, and `tags:` — not the full body). Build an in-memory index:
+
+```
+existing_insights = [
+  { path, summary, scenarios, tags },
+  ...
+]
+```
+
+Doing this once up front is more efficient than running a live search per candidate in step 3c, and it also lets you catch cross-candidate duplicates (two candidates in the same batch that express the same lesson).
 
 ## Step 3: For each candidate note
 
@@ -71,9 +84,17 @@ If the candidate fails any of these, skip it.
 
 ### 3c. Check for duplicates
 
-Before creating a new insight, use obsidian-mcp `search_notes` to search `40_Insights/` for existing notes with similar titles or summaries. If a near-duplicate exists, prefer to **augment the existing insight** (add a related source, expand the body) over creating a new file.
+Use the deduplication index from step 2b — no additional vault reads needed here.
 
-Use a simple heuristic: if the existing insight's `summary:` and the candidate's stated lesson would overlap by ≥70%, treat as duplicate.
+**Against existing insights:**
+
+- **Near-duplicate (≥70% overlap with an existing summary)**: mark as `UPDATE existing [[slug]]` rather than `NEW`. Don't create a new file — augment the existing one in step 5.
+- **Partial overlap (40–70%)**: keep as `NEW` but set `related: ["[[existing-slug]]"]` in the draft frontmatter to surface the connection.
+- **No meaningful overlap (<40%)**: proceed as `NEW`.
+
+**Against other candidates in the current batch:**
+
+After drafting each candidate, also compare it against candidates already drafted in this run. If two candidates from different source notes express the same core lesson, merge them into a single draft, listing both source notes in `source:`. Don't create two near-identical insight files.
 
 ### 3d. Pick scenarios
 
@@ -108,9 +129,34 @@ Use `_templates/insight.md`. Fill:
   - **How to apply**: when it kicks in.
   - **Caveats**: when it doesn't apply. Insights without caveats are usually overgeneralized — try to think of one.
 
+### 3f. Scan for emerging scenario patterns
+
+After processing all candidates from all source notes, look across the full draft batch for scenario gaps — don't wait for a single misfit to surface them.
+
+1. Group all drafted candidates by the scenarios you tentatively assigned.
+2. Look for clusters of **2 or more** candidates that share a topic, tag, or theme but are awkwardly assigned to a broad catch-all scenario (like `lessons-learned` or `decisions`) only because no more specific scenario exists.
+3. Also gather any candidates you flagged as `[no-scenario]` during step 3b.
+4. For each cluster or group of misfits, ask: *would a new scenario serve these better, and would the user plausibly query for it separately?* If yes, draft a scenario proposal (name, purpose, inclusion criteria).
+
+Hold these proposals — you'll present them in step 4 alongside the insight drafts. This replaces the per-candidate interruption that step 6 used to trigger.
+
+If only one candidate needs a new scenario and no cluster supports it, skip the proposal. One insight is not enough to justify a new scenario bucket.
+
 ## Step 4: Present drafts to the user
 
-Do **not** save insight files yet. Present the drafts for review:
+Do **not** save insight files yet. Present the drafts for review.
+
+If step 3f produced scenario proposals, lead with them before the insight list:
+
+```
+Scenario proposal: <name>
+Purpose: <when the user would query for it>
+Inclusion criteria: <what belongs here>
+Affects N candidates: <titles>
+[Action: Approve / Reject]
+```
+
+Then present each insight draft:
 
 ```
 Found N candidate insights from M source notes.
@@ -119,13 +165,13 @@ Insight 1 / N: <title>
 Source: <source note path>
 Scenarios: [scenario1, scenario2]
 Summary: <one-sentence>
-Status: NEW | UPDATE existing [[insight-name]]
+Status: NEW | UPDATE existing [[insight-name]] | MERGE with [[other-candidate]]
 
 The insight: <body>
 [Action: Accept / Edit / Reject]
 ```
 
-Wait for the user's decision per insight. Apply edits as instructed before saving.
+Wait for the user's decision on scenario proposals first, then insights. Apply any approved scenario names before assigning them to insights. Apply edits as instructed before saving.
 
 ## Step 5: Save accepted insights and update sources
 
@@ -147,16 +193,14 @@ For rejected candidates:
 
 - Don't create the file. Use obsidian-mcp `update_note` to mark the bullet in the source note: `- [~] <description> (rejected: <reason>)`.
 
-## Step 6: Propose new scenarios (if needed)
+## Step 6: Save approved scenarios
 
-If during processing you encounter a candidate insight that genuinely doesn't fit any active scenario, **before** creating it:
+For each scenario proposal the user approved in step 4:
 
-1. Propose a new scenario with: `name` (kebab-case), `purpose` (when the user would query for it), `inclusion criteria`.
-2. Ask the user to approve.
-3. If approved, use obsidian-mcp `update_note` to append the new scenario to `_meta/Scenarios.md` under `## Active scenarios`.
-4. Use it for the candidate insight.
+1. Use obsidian-mcp `update_note` to append it to `_meta/Scenarios.md` under `## Active scenarios`.
+2. Apply the new scenario name to the relevant insight drafts before saving them in step 5.
 
-Be stingy with new scenarios. Adding a new one should require ≥2 candidate insights that need it. If only one insight needs a new scenario, consider whether it really needs its own bucket, or if an existing one stretches to fit.
+Scenario proposals come from the batch-level pattern scan in step 3f — not from per-candidate interruptions mid-processing. If a single candidate has no scenario fit and no batch pattern supported a proposal, assign the closest existing scenario and add a note in the insight's body about the imperfect fit. Don't block on it.
 
 ## Step 7: Mark fully-processed notes as linked
 
@@ -166,11 +210,12 @@ Use obsidian-mcp `update_note` to flip source notes where **all** candidate insi
 
 Reply with:
 
-1. Number of insights created (new + updates).
-2. Number of candidates rejected.
-3. Number of source notes updated.
-4. Any new scenarios added to the registry.
-5. A list of saved insight paths.
+1. Number of insights created (new + updates + merges).
+2. Number of candidates deduplicated (merged into existing insights or cross-batch merges).
+3. Number of candidates rejected.
+4. Number of source notes updated.
+5. Any new scenarios added to the registry.
+6. A list of saved insight paths.
 
 ## What this skill does NOT do
 
