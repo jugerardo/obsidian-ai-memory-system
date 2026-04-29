@@ -35,4 +35,4 @@ Two paths:
 1. **Manually** — you write one when you've learned something durable.
 2. **Insight-extraction skill** — runs over notes flagged `status: raw`, identifies atomic insights, creates files here, links back to source.
 
-See `_templates/skill-insight-extraction.md`.
+See `_templates/mem-insight-extraction.md`.

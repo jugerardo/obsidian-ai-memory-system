@@ -60,7 +60,7 @@ When I say **"wrap up"**, **"wrap up this session"**, or **"save this session"**
 
 Do not use file system tools (Read, Write, Edit, Bash) for any of the above — obsidian-mcp only.
 
-Full skill reference: `_templates/skill-wrap-up.md`.
+Full skill reference: `_templates/mem-wrap-up.md`.
 
 ## Active people / stakeholders
 
