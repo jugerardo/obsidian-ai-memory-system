@@ -4,8 +4,8 @@ Drop this file into a new project folder as `CLAUDE.md`. Claude will read it aut
 
 ## Project identity
 
-- **Project name**: `{{Project Name}}` — must match the folder name under `20_Projects/` exactly. Used by the import and wrap-up skills to route notes to this project.
-- **Vault link**: `[[{{Project Name}}]]`
+- **Project name**: `{{Project Name}}` — must match the folder name under `20_Projects/` exactly. Used by the import and wrap-up skills to route notes to this project. Verify with obsidian-mcp `list_notes` on `20_Projects/`.
+- **Vault link**: `[[{{Project Name}}]]` — use this in frontmatter `project:` fields and wikilinks throughout the vault.
 
 > **If the project name above still says `{{Project Name}}`**, ask the user for it before doing anything else: "What's the name of this project in your vault? It should match the folder name under `20_Projects/`." Then use obsidian-mcp `list_notes` on `20_Projects/` to verify the folder exists. Fill the name in once confirmed and use it for the rest of the session.
 
@@ -43,7 +43,7 @@ Before doing anything, read these files in order using obsidian-mcp `read_note` 
 
 - **Session summaries** → `sessions/YYYY-MM-DD_<slug>.md`. Use obsidian-mcp `create_note` with `_templates/project-session.md` as the template.
 - **Decisions** → `decisions/YYYY-MM-DD_<slug>.md`. Use obsidian-mcp `create_note`. One decision per file. Link back to the session note that produced it.
-- **Written artifacts** → `artifacts/`. Use obsidian-mcp `create_note`. Only markdown files belong here: specs, briefs, written deliverables, prompts worth keeping.
+- **Written artifacts** → `artifacts/`. Use obsidian-mcp `create_note`. Only vault-native summaries or distillations belong here — e.g. a brief capturing the key decisions from a spec, or a prompt worth keeping. If a markdown file already exists as part of the project's actual output (a README, a spec in the repo, a design doc in Figma), don't copy it here. Instead, reference it from the session note with a link or path. The test: would this note be useful to search or link to in Obsidian independently of the project? If not, it doesn't belong in `artifacts/`.
 - **Code, binaries, exports, images** → these do **not** belong in Obsidian. Keep them in the project's own repo or storage. Reference them from session notes with a file path or external link — don't copy them here.
 - **Candidate insights** → flag inline in the session note under `## Candidate insights`. Don't create insight files directly — that's the insight-extraction skill's job.
 
@@ -55,7 +55,8 @@ When I say **"wrap up"**, **"wrap up this session"**, or **"save this session"**
 2. Use obsidian-mcp `read_note` + `update_note` to update `_index.md`:
    - Append the new session under **Recent sessions**: `- [[YYYY-MM-DD_slug|YYYY-MM-DD: short title]]`.
    - Revise **Current focus** if the session changed direction.
-3. Reply with the saved file path so I can verify.
+3. Review the **Key decisions so far** section in this file. For any inline one-liners that involve real reasoning or tradeoffs, use obsidian-mcp `create_note` to save them to `decisions/YYYY-MM-DD_<slug>.md`, then use obsidian-mcp `update_note` to replace the inline text in this file with a wikilink: `[[YYYY-MM-DD_slug|Short description]]`.
+4. Reply with the saved file path so I can verify.
 
 Do not use file system tools (Read, Write, Edit, Bash) for any of the above — obsidian-mcp only.
 
@@ -69,7 +70,10 @@ Full skill reference: `_templates/skill-wrap-up.md`.
 
 ## Key decisions so far
 
-<!-- Hand-curated link list to files in decisions/. Format: - [[YYYY-MM-DD_slug|Short description]]. Don't write decision content here — it belongs in the decisions/ file. -->
+<!-- Two formats allowed:
+  - Minor calls (no significant tradeoff): one-liner inline. e.g. "- Chose Tailwind over plain CSS for speed."
+  - Significant calls (has reasoning or tradeoffs): save to decisions/ and link here. e.g. "- [[2026-04-28_auth-approach|Auth approach]]"
+  The wrap-up skill will move any inline one-liners that grew into real decisions to decisions/ automatically. -->
 
 -
 
