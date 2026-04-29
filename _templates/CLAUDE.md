@@ -2,6 +2,11 @@
 
 Drop this file into a new project folder as `CLAUDE.md`. Claude will read it automatically when working in this directory.
 
+## Project identity
+
+- **Project name**: `{{Project Name}}` — must match the folder name under `20_Projects/` exactly. Used by the import and wrap-up skills to route notes to this project.
+- **Vault link**: `[[{{Project Name}}]]`
+
 ## Read this first
 
 Before doing anything, read these files in order:
