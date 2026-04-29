@@ -210,7 +210,7 @@ For rejected candidates:
 For each scenario proposal the user approved in step 4:
 
 1. Use obsidian-mcp `update_note` to append it to `_meta/Scenarios.md` under `## Active scenarios`.
-2. Apply the new scenario name to the relevant insight drafts before saving them in step 5.
+2. Apply the new scenario name to the relevant insight drafts before saving them in step 6.
 
 Scenario proposals come from the batch-level pattern scan in step 3f — not from per-candidate interruptions mid-processing. If a single candidate has no scenario fit and no batch pattern supported a proposal, assign the closest existing scenario and add a note in the insight's body about the imperfect fit. Don't block on it.
 
