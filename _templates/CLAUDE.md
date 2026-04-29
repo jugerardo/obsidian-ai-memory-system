@@ -7,6 +7,8 @@ Drop this file into a new project folder as `CLAUDE.md`. Claude will read it aut
 - **Project name**: `{{Project Name}}` — must match the folder name under `20_Projects/` exactly. Used by the import and wrap-up skills to route notes to this project.
 - **Vault link**: `[[{{Project Name}}]]`
 
+> **If the project name above still says `{{Project Name}}`**, ask the user for it before doing anything else: "What's the name of this project in your vault? It should match the folder name under `20_Projects/`." Fill it in once confirmed and use it for the rest of the session.
+
 ## Read this first
 
 Before doing anything, read these files in order:
