@@ -133,7 +133,6 @@ Beyond that:
 Things planned for future iterations:
 
 - A "warm start" command that loads the most relevant scenarios into context when you begin a new project
-- Automated import from raw ChatGPT/Gemini JSON export formats (currently mem-import handles pasted text; structured JSON parsing is next)
 
 Contributions and forks welcome.
 
