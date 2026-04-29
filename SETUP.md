@@ -274,7 +274,7 @@ Have a working session with Claude inside the project folder, then say **"wrap u
 
 Decide on a cadence (weekly is a good default). At your chosen time:
 
-1. Glance at the inbox and triage anything new.
+1. **Triage the inbox.** For sessions you had in other AI tools (ChatGPT, Gemini, etc.), use the prompts in `_templates/external-ai-wrap-up-prompts.md` to generate a pre-formatted summary before you leave the tool. Drop the output in `00_Inbox/` as a `.md` file, then move it to the right folder (`10_Conversations/`, `30_Code_Sessions/`, etc.). The prompts set `status: raw` automatically.
 2. Run the insight-extraction skill: "extract insights from new notes".
 3. Review the proposed insights — accept, edit, or reject each one.
 

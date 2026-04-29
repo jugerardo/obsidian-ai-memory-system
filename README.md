@@ -35,7 +35,8 @@ This repo is a **template** — folder structure, note templates, skills, conven
 │   ├── insight.md
 │   ├── project-index.md
 │   ├── skill-wrap-up.md       ← The "wrap up this session" skill
-│   └── skill-insight-extraction.md  ← The "extract insights" skill
+│   ├── skill-insight-extraction.md  ← The "extract insights" skill
+│   └── external-ai-wrap-up-prompts.md  ← Prompts for ChatGPT/Gemini to generate vault-ready summaries
 ├── 00_Inbox/                  ← Untriaged captures
 ├── 10_Conversations/          ← Standalone AI chats
 ├── 20_Projects/               ← Multi-session project work
@@ -96,14 +97,16 @@ Each insight can belong to multiple scenarios. New scenarios get added to `_meta
 
 ### Importing from other AI tools
 
-Drop ChatGPT/Gemini/etc. exports into `00_Inbox/`, then triage:
+The easiest path is to generate a pre-formatted summary before leaving the other tool. `_templates/external-ai-wrap-up-prompts.md` has ready-to-paste prompts for ChatGPT, Gemini, and others — one per note type (conversation, code session, project session). Run the relevant prompt at the end of your session, copy the output, and drop it in `00_Inbox/` as a `.md` file.
+
+From there, triage:
 
 1. Decide which folder the note belongs to (conversation / project session / etc.)
 2. Move it
-3. Add frontmatter with `status: raw`
+3. Verify the frontmatter has `status: raw` (the prompts set this automatically)
 4. Run the insight-extraction skill on a schedule to harvest insights
 
-A future improvement is automated import that handles frontmatter and routing — see [Roadmap](#roadmap).
+A future improvement is automated import that handles frontmatter and routing for raw exports — see [Roadmap](#roadmap).
 
 ## Getting started
 
