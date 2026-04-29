@@ -173,7 +173,19 @@ The insight: <body>
 
 Wait for the user's decision on scenario proposals first, then insights. Apply any approved scenario names before assigning them to insights. Apply edits as instructed before saving.
 
-## Step 5: Save accepted insights and update sources
+## Step 5: Validate scenarios on accepted insights
+
+Before saving anything, cross-check every accepted insight's `scenarios:` list against the registry loaded in step 2a.
+
+For each scenario tag on each accepted insight:
+
+- **Exact match** → valid, proceed.
+- **No match** → flag it before saving: "Insight '<title>' uses unknown scenario '<name>'. Closest match in registry: '<registry-name>'. Correct it or override?" Wait for the user's decision. Do not save an insight with an unrecognised scenario tag.
+- **Case or spacing mismatch** (e.g. `Self-Review` vs `self-review`) → correct silently and note the fix in the reply.
+
+This step is a safety net for insights drafted in step 3 where a scenario name was guessed or typed incorrectly. It runs even if all scenarios look correct — the check is fast since the registry is already loaded.
+
+## Step 6: Save accepted insights and update sources
 
 For each accepted insight:
 
@@ -193,7 +205,7 @@ For rejected candidates:
 
 - Don't create the file. Use obsidian-mcp `update_note` to mark the bullet in the source note: `- [~] <description> (rejected: <reason>)`.
 
-## Step 6: Save approved scenarios
+## Step 7: Save approved scenarios
 
 For each scenario proposal the user approved in step 4:
 
@@ -202,11 +214,22 @@ For each scenario proposal the user approved in step 4:
 
 Scenario proposals come from the batch-level pattern scan in step 3f — not from per-candidate interruptions mid-processing. If a single candidate has no scenario fit and no batch pattern supported a proposal, assign the closest existing scenario and add a note in the insight's body about the imperfect fit. Don't block on it.
 
-## Step 7: Mark fully-processed notes as linked
+## Step 8: Check MOC coverage
+
+After all insights and scenarios are saved, collect the unique set of scenario names used across every insight saved in this run (including any newly approved scenarios from step 7).
+
+For each scenario, use obsidian-mcp `list_notes` on `60_MOCs/Scenarios/` to check whether a corresponding MOC file exists. The expected filename is `<ScenarioName>.md` in Title-Case (e.g. scenario `self-review` → `Self-Review.md`).
+
+- **MOC exists** → no action needed.
+- **MOC missing** → surface a warning in the reply: "No MOC found for scenario '<name>'. Consider creating `60_MOCs/Scenarios/<Name>.md` so insights tagged with this scenario are queryable."
+
+Do **not** create the MOC automatically. MOC structure is the user's decision. Just flag the gap clearly so it can be addressed in a separate pass.
+
+## Step 9: Mark fully-processed notes as linked
 
 Use obsidian-mcp `update_note` to flip source notes where **all** candidate insights have been processed (accepted, rejected, or merged) to `status: linked`. Notes with un-processed candidates stay at `processed`.
 
-## Step 8: Reply
+## Step 10: Reply
 
 Reply with:
 
@@ -215,12 +238,15 @@ Reply with:
 3. Number of candidates rejected.
 4. Number of source notes updated.
 5. Any new scenarios added to the registry.
-6. A list of saved insight paths.
+6. Any scenario tag corrections made silently (step 5).
+7. Any missing MOCs flagged (step 8).
+8. A list of saved insight paths.
 
 ## What this skill does NOT do
 
 - It does **not** modify the body of existing source notes (only frontmatter and the `## Candidate insights` checkboxes).
-- It does **not** create new MOCs or tags outside the registry.
+- It does **not** create MOCs — it only flags when one is missing (step 8).
+- It does **not** create scenario tags outside the registry — unrecognised tags are flagged and blocked (step 5).
 - It does **not** silently filter — every rejection is logged in the source note.
 
 ## Cadence
